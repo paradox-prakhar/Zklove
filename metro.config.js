@@ -1,20 +1,33 @@
 const { getDefaultConfig } = require('expo/metro-config');
 
 /** @type {import('expo/metro-config').MetroConfig} */
-const config = getDefaultConfig(__dirname);
+const defaultConfig = getDefaultConfig(__dirname);
 
-// Add support for blockchain and crypto libraries
-config.resolver.alias = {
-  ...config.resolver.alias,
-  'crypto': 'react-native-crypto-js',
-  'stream': 'stream-browserify',
-  'buffer': 'buffer',
+const config = {
+  ...defaultConfig,
+  transformer: {
+    ...defaultConfig.transformer,
+    babelTransformerPath: require.resolve('react-native-css-transformer'),
+    minifierPath: require.resolve('metro-minify-terser'),
+  },
+  resolver: {
+    ...defaultConfig.resolver,
+    sourceExts: [...defaultConfig.resolver.sourceExts, 'css', 'scss', 'sass'],
+    assetExts: [...defaultConfig.resolver.assetExts, 'css'],
+    extraNodeModules: {
+      ...defaultConfig.resolver.extraNodeModules,
+      stream: require.resolve('stream-browserify'),
+      crypto: require.resolve('crypto-browserify'),
+      buffer: require.resolve('buffer'),
+      process: require.resolve('process/browser'),
+    },
+    blockList: [
+      /.*\.win32-x64-msvc\.node$/,
+      /.*\.android.bundle$/,
+      /.*\.ios.bundle$/,
+      ...(defaultConfig.resolver.blockList || []),
+    ],
+  },
 };
-
-// Add crypto and buffer to the list of modules to be resolved
-config.resolver.platforms = ['ios', 'android', 'native', 'web'];
-
-// Handle node modules that need polyfills
-config.resolver.resolverMainFields = ['react-native', 'browser', 'main'];
 
 module.exports = config;

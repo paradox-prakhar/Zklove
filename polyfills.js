@@ -1,31 +1,32 @@
-// React Native Polyfills for Blockchain Functionality
 import 'react-native-get-random-values';
+import { Buffer } from 'buffer';
+import process from 'process';
 
-// Essential crypto polyfills
-if (typeof global.crypto === 'undefined') {
-  global.crypto = {};
+if (typeof global !== 'undefined') {
+  // Crypto polyfills
+  if (!global.crypto) {
+    global.crypto = require('react-native-crypto-js');
+  }
+  
+  // Buffer polyfill
+  if (!global.Buffer) {
+    global.Buffer = Buffer;
+  }
+  
+  // Process polyfill
+  if (!global.process) {
+    global.process = process;
+  }
+
+  // Ensure TextEncoder is available
+  if (typeof global.TextEncoder === 'undefined') {
+    global.TextEncoder = require('text-encoder').TextEncoder;
+    global.TextDecoder = require('text-encoder').TextDecoder;
+  }
 }
 
-if (typeof global.crypto.getRandomValues === 'undefined') {
-  global.crypto.getRandomValues = require('react-native-get-random-values').getRandomValues;
-}
-
-// Buffer polyfill for ethers.js
-if (typeof global.Buffer === 'undefined') {
-  global.Buffer = require('buffer').Buffer;
-}
-
-// TextEncoder/TextDecoder polyfill
-if (typeof global.TextEncoder === 'undefined') {
-  const { TextEncoder, TextDecoder } = require('text-encoding');
-  global.TextEncoder = TextEncoder;
-  global.TextDecoder = TextDecoder;
-}
-
-// Simple fetch polyfill check
-if (typeof global.fetch === 'undefined') {
-  // Let React Native handle fetch natively
-  console.log('Using React Native fetch');
-}
+// Required for ethers.js
+global.btoa = global.btoa || require('base-64').encode;
+global.atob = global.atob || require('base-64').decode;
 
 console.log('Essential blockchain polyfills loaded successfully');
